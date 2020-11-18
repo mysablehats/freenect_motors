@@ -136,7 +136,7 @@ ${catkin_INCLUDE_DIRS}
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/freenect_motors_node.cpp)
 
-add_executable(freenecttiltdemo src/tiltdemo.c)
+add_executable(freenecttiltdemo src/tiltdemo.cpp)
 add_executable(freenectotherdemo src/wavrecord.c)
 
 ## Rename C++ executable without prefix

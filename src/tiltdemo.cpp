@@ -127,6 +127,7 @@ void setTiltAngle(const std_msgs::Float64 angleMsg)
 	//angle = angle * 2;
   // Set the tilt angle (in degrees)
   if (freenect_sync_set_tilt_degs(angle, 0)) no_kinect_quit(SETTING_TILT);
+ROS_INFO_STREAM("HELLO!. %f" << angle );
 
 }
 
@@ -135,10 +136,10 @@ void setLedOption(const std_msgs::UInt16 optionMsg)
 	uint8_t empty[0x1];
 	const uint16_t option(optionMsg.data);
 
-	const int ret = libusb_control_transfer(dev, 0x40, 0x06, , 0x0, empty, 0x0, 0);
+	freenect_led_options led = (freenect_led_options) (option % 6); // explicit cast
 
   // Set the LEDs to one of the possible states
-  if (freenect_sync_set_led((uint16_t)(option% 6), 0)) no_kinect_quit(SETTING_LED);
+  if (freenect_sync_set_led( led, 0)) no_kinect_quit(SETTING_LED);
 }
 
 int main(int argc, char *argv[])
@@ -157,22 +158,26 @@ int main(int argc, char *argv[])
   sub_tilt_angle = n.subscribe("tilt_angle", 1, setTiltAngle);
   sub_led_option = n.subscribe("led_option", 1, setLedOption);
 
+  ros::Rate r(1);
+
 	while (ros::ok()) {
-		// Pick a random tilt and a random LED state
-		freenect_led_options led = (freenect_led_options) (rand() % 6); // explicit cast
+		
 		//int tilt = (rand() % 30)-15;
 		freenect_raw_tilt_state *state = 0;
 		double dx, dy, dz;
 
 		// Get the raw accelerometer values and tilt data
-		if (freenect_sync_get_tilt_state(&state, 0)) no_kinect_quit();
+		if (freenect_sync_get_tilt_state(&state, 0)) no_kinect_quit(SOMETHIN_ELSE);
 
 		// Get the processed accelerometer values (calibrated to gravity)
 		freenect_get_mks_accel(state, &dx, &dy, &dz);
 
-		printf("led[%d] tilt[%d] accel[%lf,%lf,%lf]\n", led, tilt, dx,dy,dz);
-    //should be a publisher. I don't care about this.
-		sleep(3); //todo rate
+		//need to re-add led and tilt state publishers. tilt should come from state. led is presumed (I guess)
+
+		printf("led[--] tilt[--] accel[%lf,%lf,%lf]\n", dx,dy,dz);
+ 		   //should be a publisher. I don't care about this.
+		ros::spinOnce();
+		r.sleep();
     
 	}
 }
