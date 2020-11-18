@@ -1,0 +1,3 @@
+[submodule "include/libfreenect"]
+	path = include/libfreenect
+	url = http://github.com/mysablehats/libfreenect.git
